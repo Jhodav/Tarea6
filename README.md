@@ -1,23 +1,21 @@
 # Sistema de Ahorro de Energía con ESP32 - Light Sleep
 
 ## Descripción
-Este proyecto implementa un sistema de gestión de energía en el ESP32 utilizando el modo **Light Sleep**. Simula una tarea activa durante 8 segundos y luego entra en reposo, pudiendo ser reactivado mediante un botón externo o un temporizador automático. El proyecto está diseñado para ejecutarse completamente en el simulador **Wokwi**.
+Este proyecto implementa un sistema de gestión de energía en el ESP32 utilizando el modo **Light Sleep**. Simula una tarea activa durante 8 segundos y luego entra en reposo, pudiendo ser reactivado mediante un botón externo. El proyecto está diseñado para ejecutarse completamente en el simulador **Wokwi**.
 
 ## Funcionamiento
-- **Modo Activo**: LED rojo (GPIO2) parpadea cada 500ms durante 8 segundos, simulando una tarea en ejecución.
+- **Modo Activo**: LED rojo (GPIO2) parpadea cada 500ms durante 10 segundos, simulando una tarea en ejecución.
 - **Modo Reposo**: LED amarillo (GPIO4) se enciende fijo, indicando que el sistema está en Light Sleep.
 - **Reactivación**: 
   - Botón externo en GPIO5 (presionar para despertar inmediatamente)
-  - Temporizador automático (15 segundos)
-- **Confirmación**: Al despertar, el LED amarillo parpadea 6 veces.
+- **Confirmación**: Al despertar, el LED amarillo parpadea 3 veces.
 
 ## Componentes en Wokwi
 - 1 ESP32 DevKit V4
-- 1 LED Rojo (GPIO2)
-- 1 LED Amarillo (GPIO4)
+- 1 LED Rojo 
+- 1 LED Amarillo 
 - 2 Resistencias de 220Ω
-- 1 Botón pulsador (GPIO5)
-- 1 Resistencia de 10kΩ (pull-up)
+- 1 Botón pulsador 
 
 ## Instrucciones de Ejecución en Wokwi
 
