@@ -1,1 +1,113 @@
-d
+#include <Arduino.h>
+
+// ===== DEFINICION DE PINES =====
+#define LED_PROCESO     2   // LED ROJO - Indica proceso activo
+#define LED_ESPERA      4   // LED AMARILLO - Indica modo reposo
+#define BOTON_DESPERTAR 5   // Activo en LOW (pull-up externo de 10k a 3V3)
+
+// ===== CONFIGURACION DE TIEMPOS =====
+#define DURACION_PROCESO_MS   8000   // 8 segundos de trabajo
+#define DURACION_REPOSO_SEG   15     // 15 segundos en reposo (maximo)
+
+// ===== VARIABLES GLOBALES =====
+int contadorCiclos = 0;
+
+// ===== PROTOTIPOS DE FUNCIONES =====
+void inicializarPines();
+bool ejecutarProceso();
+bool modoReposo();
+void mostrarCausaDespertar(bool botonEnProceso, bool botonEnReposo);
+
+// ============================== SETUP ==================================
+void setup() {
+  Serial.begin(115200);
+  delay(500);
+
+  inicializarPines();
+  Serial.println("\n=== Sistema operativo iniciado ===");
+  Serial.println("LED PROCESO = Trabajando");
+  Serial.println("LED ESPERA = En reposo");
+  Serial.println("Boton GPIO5 = Reactivar");
+  Serial.println("==========================================\n");
+}
+
+// ============================== LOOP ==================================
+void loop() {
+  contadorCiclos++;
+  Serial.println("\n===========================================");
+  Serial.printf("Ciclo de trabajo numero: %d\n", contadorCiclos);
+  Serial.println("===========================================");
+
+  bool botonEnProceso = ejecutarProceso();
+  bool botonEnReposo = modoReposo();
+  mostrarCausaDespertar(botonEnProceso, botonEnReposo);
+}
+
+// ============================ FUNCIONES =================================
+
+void inicializarPines() {
+  pinMode(LED_PROCESO, OUTPUT);
+  pinMode(LED_ESPERA, OUTPUT);
+  pinMode(BOTON_DESPERTAR, INPUT_PULLUP);
+  
+  digitalWrite(LED_PROCESO, LOW);
+  digitalWrite(LED_ESPERA, LOW);
+}
+
+bool ejecutarProceso() {
+  Serial.println("Sistema en MODO TRABAJO - realizando operaciones...");
+  unsigned long tiempoInicio = millis();
+  bool estadoLED = false;
+  bool botonPresionado = false;
+
+  while (millis() - tiempoInicio < DURACION_PROCESO_MS) {
+    estadoLED = !estadoLED;
+    digitalWrite(LED_PROCESO, estadoLED ? HIGH : LOW);
+
+    if (digitalRead(BOTON_DESPERTAR) == LOW) {
+      botonPresionado = true;
+      Serial.println("  >>> BOTON detectado durante el proceso activo");
+    }
+
+    Serial.println(" Realizando actividad");
+    delay(500);
+  }
+  
+  digitalWrite(LED_PROCESO, LOW);
+  return botonPresionado;
+}
+
+bool modoReposo() {
+  Serial.println(" Transicionando a MODO REPOSO ...");
+  digitalWrite(LED_ESPERA, HIGH);
+  delay(1000);
+
+  unsigned long tiempoInicio = millis();
+  while (millis() - tiempoInicio < DURACION_REPOSO_SEG * 1000UL) {
+    if (digitalRead(BOTON_DESPERTAR) == LOW) {
+      while (digitalRead(BOTON_DESPERTAR) == LOW) {
+        delay(50);
+      }
+      digitalWrite(LED_ESPERA, LOW);
+      return true;
+    }
+    delay(50);
+  }
+
+  digitalWrite(LED_ESPERA, LOW);
+  return false;
+}
+
+void mostrarCausaDespertar(bool botonEnProceso, bool botonEnReposo) {
+  if (botonEnProceso || botonEnReposo) {
+    Serial.println("[REACTIVACION] Origen: BOTON");
+    for (int i = 0; i < 6; i++) {
+      digitalWrite(LED_ESPERA, HIGH);
+      delay(100);
+      digitalWrite(LED_ESPERA, LOW);
+      delay(100);
+    }
+  } else {
+    Serial.println("[REACTIVACION] Origen: TEMPORIZADOR AUTOMATIC0");
+  }
+}
